@@ -13,12 +13,13 @@ import (
 // Client enables you to send OSC packets. It sends OSC messages and bundles to
 // the given IP address and port.
 type Client struct {
-	ip     string
-	port   int
-	laddr  *net.UDPAddr
-	conn   *net.UDPConn
-	server *Server
-	mtx    sync.Mutex
+	ip        string
+	port      int
+	laddr     *net.UDPAddr
+	conn      *net.UDPConn
+	server    *Server
+	mtx       sync.Mutex
+	listening chan struct{}
 }
 
 // NewClient creates a new OSC client. The Client is used to send OSC
@@ -26,7 +27,12 @@ type Client struct {
 // specifies the IP address and `port` defines the target port where the
 // messages and bundles will be send to.
 func NewClient(ip string, port int) *Client {
-	return &Client{ip: ip, port: port, laddr: nil, server: &Server{}}
+	return &Client{
+		ip:     ip,
+		port:   port,
+		laddr:  nil,
+		server: NewServer(),
+	}
 }
 
 // IP returns the IP address.
@@ -45,8 +51,8 @@ func (c *Client) SetPort(port int) { c.port = port }
 func (c *Client) SetConnection(conn *net.UDPConn) {
 	c.mtx.Lock()
 	defer c.mtx.Unlock()
-	c.server.SetConnection(c.conn)
 	c.conn = conn
+	c.server.SetConnection(c.conn)
 }
 
 // Connection returns the current connection
@@ -68,6 +74,15 @@ func (c *Client) SetLocalAddr(ip string, port int) error {
 	c.laddr = laddr
 	return nil
 }
+
+// LocalAddr gets the local address.
+func (c *Client) LocalAddr() *net.UDPAddr { return c.laddr }
+
+// LocalIP gets the local listening IP address
+func (c *Client) LocalIP() string { return c.laddr.IP.String() }
+
+// LocalPort gets the local listening IP address
+func (c *Client) LocalPort() int { return c.laddr.Port }
 
 // Connected returns the client connected state
 func (c *Client) Connected() bool {
@@ -140,5 +155,11 @@ func (c *Client) ListenAndServe() error {
 		c.server.Dispatcher = NewStandardDispatcher()
 	}
 
+	c.listening <- struct{}{}
 	return c.server.Serve()
+}
+
+// Ready returns a chan that blocks until ListenAndServe is ready and listening
+func (c *Client) Ready() <-chan struct{} {
+	return c.server.Ready()
 }

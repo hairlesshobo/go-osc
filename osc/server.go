@@ -20,6 +20,13 @@ type Server struct {
 	ReadTimeout time.Duration
 	conn        net.PacketConn
 	close       func() error
+	ready       chan struct{}
+}
+
+func NewServer() *Server {
+	return &Server{
+		ready: make(chan struct{}),
+	}
 }
 
 // ListenAndServe retrieves incoming OSC packets and dispatches the retrieved
@@ -59,6 +66,8 @@ func (s *Server) SetConnection(c net.PacketConn) {
 // Serve retrieves incoming OSC packets from the given connection and dispatches
 // retrieved OSC packets. If something goes wrong an error is returned.
 func (s *Server) Serve() error {
+	close(s.ready)
+
 	var tempDelay time.Duration
 	for {
 		msg, err := s.readFromConnection()
@@ -81,6 +90,11 @@ func (s *Server) Serve() error {
 
 		go s.Dispatcher.Dispatch(msg)
 	}
+}
+
+// Ready indicates that the server is started and listening for packets
+func (s *Server) Ready() <-chan struct{} {
+	return s.ready
 }
 
 // CloseConnection forcibly closes a server's connection.
