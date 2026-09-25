@@ -1,6 +1,6 @@
 package main
 
-import "github.com/gpayer/go-osc/osc"
+import "github.com/hairlesshobo/go-osc/osc"
 
 func main() {
 	finished := make(chan struct{})

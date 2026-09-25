@@ -1,3 +1,3 @@
-module github.com/gpayer/go-osc
+module github.com/hairlesshobo/go-osc
 
 go 1.15
