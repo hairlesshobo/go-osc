@@ -3,6 +3,7 @@ package osc
 import (
 	"fmt"
 	"net"
+	"strings"
 	"sync"
 )
 
@@ -78,10 +79,26 @@ func (c *Client) SetLocalAddr(ip string, port int) error {
 func (c *Client) LocalAddr() *net.UDPAddr { return c.laddr }
 
 // LocalIP gets the local listening IP address
-func (c *Client) LocalIP() string { return c.laddr.IP.String() }
+func (c *Client) LocalIP() string {
+	if c.conn == nil {
+		return ""
+	}
+
+	localAddr := c.conn.LocalAddr().(*net.UDPAddr)
+	parts := strings.Split(localAddr.IP.String(), ":")
+
+	return parts[0]
+}
 
 // LocalPort gets the local listening IP address
-func (c *Client) LocalPort() int { return c.laddr.Port }
+func (c *Client) LocalPort() int {
+	if c.conn == nil {
+		return -1
+	}
+
+	localAddr := c.conn.LocalAddr().(*net.UDPAddr)
+	return localAddr.Port
+}
 
 // Connected returns the client connected state
 func (c *Client) Connected() bool {
