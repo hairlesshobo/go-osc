@@ -13,13 +13,12 @@ import (
 // Client enables you to send OSC packets. It sends OSC messages and bundles to
 // the given IP address and port.
 type Client struct {
-	ip        string
-	port      int
-	laddr     *net.UDPAddr
-	conn      *net.UDPConn
-	server    *Server
-	mtx       sync.Mutex
-	listening chan struct{}
+	ip     string
+	port   int
+	laddr  *net.UDPAddr
+	conn   *net.UDPConn
+	server *Server
+	mtx    sync.Mutex
 }
 
 // NewClient creates a new OSC client. The Client is used to send OSC
@@ -155,7 +154,6 @@ func (c *Client) ListenAndServe() error {
 		c.server.Dispatcher = NewStandardDispatcher()
 	}
 
-	c.listening <- struct{}{}
 	return c.server.Serve()
 }
 
