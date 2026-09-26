@@ -216,7 +216,7 @@ func TestServerMessageReceiving(t *testing.T) {
 
 	// Start the server in a go-routine
 	go func() {
-		server := NewServer()
+		server := NewServer("")
 
 		c, err := net.ListenPacket("udp", "localhost:"+strconv.Itoa(port))
 		if err != nil {

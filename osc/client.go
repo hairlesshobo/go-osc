@@ -31,7 +31,7 @@ func NewClient(ip string, port int) *Client {
 		ip:     ip,
 		port:   port,
 		laddr:  nil,
-		server: NewServer(),
+		server: NewServer(""),
 	}
 }
 

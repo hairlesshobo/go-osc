@@ -23,10 +23,16 @@ type Server struct {
 	ready       chan struct{}
 }
 
-func NewServer() *Server {
+func NewServer(addr string) *Server {
 	return &Server{
+		Addr:  addr,
 		ready: make(chan struct{}),
 	}
+}
+
+// SetDispatcher sets the dispatcher to use to handle responses.
+func (s *Server) SetDispatcher(d Dispatcher) {
+	s.Dispatcher = d
 }
 
 // ListenAndServe retrieves incoming OSC packets and dispatches the retrieved
